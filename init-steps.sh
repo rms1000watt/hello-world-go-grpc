@@ -5,7 +5,8 @@
 # place bin at: /usr/local/bin/protoc
 
 # Download protobuf compiler/generator for go
-go get -u github.com/golang/protobuf/protoc-gen-go
+# TODO: vendor this as well
+go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
 
 # Create project path
 mkdir hello-world-go-grpc
@@ -15,26 +16,32 @@ cd hello-world-go-grpc
 go get -u github.com/kardianos/govendor
 govendor init
 govendor fetch google.golang.org/grpc
-govendor fetch google.golang.org/grpc/reflection
+govendor fetch github.com/spf13/cobra/cobra
 
-# Install globally and run cobra
-go get -v github.com/spf13/cobra/cobra
-cobra init
-cobra add serve
+# run cobra
+go run vendor/github.com/spf13/cobra/cobra/main.go init
+go run vendor/github.com/spf13/cobra/cobra/main.go add serve
 
 # Create a protobuf directory and add protobuf file
 mkdir pb
 touch pb/helloWorld.proto
-# Edit helloWorld.proto
+# Edit pb/helloWorld.proto
+
+# Create a doc.go file with go:generate 
+cat <<EOF > doc.go
+//go:generate echo "Generating Protobuf"
+//go:generate protoc --go_out=plugins=grpc:. pb/helloWorld.proto
+
+package main
+EOF
 
 # Generate go-proto files
-protoc --go_out=plugins=grpc:. pb/helloWorld.proto
-
+go generate
 
 # Create a src directory
 mkdir src
-mkdir src/serve
-touch src/serve/main.go
-# Edit main.go
+touch src/main.go
+# Edit src/main.go
+
 
 

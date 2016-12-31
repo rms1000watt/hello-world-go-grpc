@@ -44,6 +44,20 @@ func (m *HelloWorldRequest) String() string            { return proto.CompactTex
 func (*HelloWorldRequest) ProtoMessage()               {}
 func (*HelloWorldRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
+func (m *HelloWorldRequest) GetFirstName() string {
+	if m != nil {
+		return m.FirstName
+	}
+	return ""
+}
+
+func (m *HelloWorldRequest) GetLastName() string {
+	if m != nil {
+		return m.LastName
+	}
+	return ""
+}
+
 type HelloWorldResponse struct {
 	Greetings string `protobuf:"bytes,1,opt,name=greetings" json:"greetings,omitempty"`
 }
@@ -52,6 +66,13 @@ func (m *HelloWorldResponse) Reset()                    { *m = HelloWorldRespons
 func (m *HelloWorldResponse) String() string            { return proto.CompactTextString(m) }
 func (*HelloWorldResponse) ProtoMessage()               {}
 func (*HelloWorldResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+func (m *HelloWorldResponse) GetGreetings() string {
+	if m != nil {
+		return m.Greetings
+	}
+	return ""
+}
 
 func init() {
 	proto.RegisterType((*HelloWorldRequest)(nil), "pb.HelloWorldRequest")
@@ -64,7 +85,7 @@ var _ grpc.ClientConn
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion3
+const _ = grpc.SupportPackageIsVersion4
 
 // Client API for HelloWorld service
 
@@ -127,7 +148,7 @@ var _HelloWorld_serviceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: fileDescriptor0,
+	Metadata: "pb/helloWorld.proto",
 }
 
 func init() { proto.RegisterFile("pb/helloWorld.proto", fileDescriptor0) }
