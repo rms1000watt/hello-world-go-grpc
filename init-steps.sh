@@ -27,21 +27,40 @@ mkdir pb
 touch pb/helloWorld.proto
 # Edit pb/helloWorld.proto
 
-# Create a doc.go file with go:generate 
-cat <<EOF > doc.go
-//go:generate echo "Generating Protobuf"
-//go:generate protoc --go_out=plugins=grpc:. pb/helloWorld.proto
-
-package main
-EOF
-
 # Generate go-proto files
-go generate
+protoc --go_out=plugins=grpc:. pb/helloWorld.proto
 
 # Create a src directory
 mkdir src
 touch src/main.go
 # Edit src/main.go
 
+# Create a dockerfile
+cat <<EOF > Dockerfile
+FROM scratch
+COPY ./hello-world-go-grpc-linux /
+EXPOSE 8081
+ENTRYPOINT ["/hello-world-go-grpc-linux", "serve"]
+EOF
+
+# Create a doc.go file with go:generate 
+cat <<EOF > doc.go
+//go:generate echo "(You can pass in ENV variables to this command `KEY1=value1 KEY2=value2 go generate`)"
+//go:generate echo "Generating Protobuf"
+//go:generate protoc --go_out=plugins=grpc:. pb/helloWorld.proto
+//go:generate echo "Building Linux"
+//go:generate sh -c "GOOS=linux go build -o hello-world-go-grpc-linux"
+//go:generate echo "Dockerizing"
+//go:generate docker build -t docker.io/rms1000watt/hello-world-go-grpc:latest .
+//go:generate echo "(You can push repo by running: `docker push docker.io/rms1000watt/hello-world-go-grpc:latest`)"
+
+package main
+EOF
 
 
+
+# Create a .gitignore
+cat <<EOF > .gitignore
+.DS_Store
+hello-world-go-grpc*
+EOF

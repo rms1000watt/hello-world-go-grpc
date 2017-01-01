@@ -1,7 +1,25 @@
-<hidden cmd="git push https://rms1000watt@github.com/rms1000watt/hello-world-go-gr
-pc.git master:master"/>
+<hidden cmd="git push https://rms1000watt@github.com/rms1000watt/hello-world-go-grpc.git master:master"/>
 # Hello World Go gRPC
 
 - Cobra
 - gRPC
 - GoVendor
+- Docker
+
+## Installation
+
+View `init-steps.sh`
+
+## Usage
+
+```
+go generate
+docker run rms1000watt/hello-world-go-grpc
+```
+
+## TODO
+
+- [] ENV-variable-based configuration
+- [] TLS
+- [] Client example
+- [] Tests
