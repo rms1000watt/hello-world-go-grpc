@@ -18,9 +18,10 @@ govendor init
 govendor fetch google.golang.org/grpc
 govendor fetch github.com/spf13/cobra/cobra
 
-# run cobra
+# Run cobra
 go run vendor/github.com/spf13/cobra/cobra/main.go init
 go run vendor/github.com/spf13/cobra/cobra/main.go add serve
+# Edit cmd/serve.go
 
 # Create a protobuf directory and add protobuf file
 mkdir pb
@@ -48,6 +49,8 @@ cat <<EOF > doc.go
 //go:generate echo "(You can pass in ENV variables to this command `KEY1=value1 KEY2=value2 go generate`)"
 //go:generate echo "Generating Protobuf"
 //go:generate protoc --go_out=plugins=grpc:. pb/helloWorld.proto
+//go:generate echo "Running Tests"
+//go:generate echo "TODO: Add test command here..."
 //go:generate echo "Building Linux"
 //go:generate sh -c "GOOS=linux go build -o hello-world-go-grpc-linux"
 //go:generate echo "Dockerizing"
@@ -57,10 +60,12 @@ cat <<EOF > doc.go
 package main
 EOF
 
-
-
 # Create a .gitignore
 cat <<EOF > .gitignore
 .DS_Store
 hello-world-go-grpc*
 EOF
+
+# Create tests
+touch pb/helloWorld_test.go
+# Edit pb/helloWorld_test.go

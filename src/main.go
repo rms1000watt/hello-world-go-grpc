@@ -10,32 +10,50 @@ import (
 	"github.com/rms1000watt/hello-world-go-grpc/pb"
 )
 
-type helloWorldServer struct{}
-
-// Hello is the RPC function to satisfy gRPC
-func (hws *helloWorldServer) Hello(ctx context.Context, in *pb.HelloWorldRequest) (*pb.HelloWorldResponse, error) {
-	greetings := "Hello" + in.FirstName + " " + in.LastName
-
-	response := &pb.HelloWorldResponse{
-		Greetings: greetings,
-	}
-	return response, nil
+// Config is the configuration for the server
+type Config struct {
+	Address string
+	Logging bool
 }
 
-func Serve() {
-	addr := "127.0.0.1:3456"
+type server struct {
+	config Config
+}
 
-	lis, err := net.Listen("tcp", addr)
+// Hello is the RPC function to satisfy the gRPC service
+func (s *server) Hello(ctx context.Context, req *pb.HelloWorldRequest) (*pb.HelloWorldResponse, error) {
+	greetings := "Hello " + req.FirstName + " " + req.LastName
+
+	res := &pb.HelloWorldResponse{
+		Greetings: greetings,
+	}
+
+	s.log(req, res)
+	return res, nil
+}
+
+func (s *server) log(req *pb.HelloWorldRequest, res *pb.HelloWorldResponse) {
+	if s.config.Logging {
+		log.Println("REQUEST", req)
+		log.Println("RESPONSE", res)
+	}
+}
+
+// Serve is the main logic for the "serve" command
+func Serve(config Config) {
+	lis, err := net.Listen("tcp", config.Address)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := grpc.NewServer()
-	hws := &helloWorldServer{}
-	pb.RegisterHelloWorldServer(s, hws)
+	grpcServer := grpc.NewServer()
+	s := &server{
+		config: config,
+	}
+	pb.RegisterHelloWorldServer(grpcServer, s)
 
-	log.Println("Serving on", addr)
-	if err := s.Serve(lis); err != nil {
+	log.Println("Serving on", config.Address)
+	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }

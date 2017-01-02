@@ -15,8 +15,18 @@
 package cmd
 
 import (
+	"log"
+	"os"
+	"strings"
+
 	"github.com/rms1000watt/hello-world-go-grpc/src"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+)
+
+var (
+	address string
+	logging bool
 )
 
 // serveCmd represents the serve command
@@ -30,21 +40,30 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		src.Serve()
+		config := src.Config{
+			Address: address,
+			Logging: logging,
+		}
+
+		log.Println("CONFIG", config)
+		src.Serve(config)
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(serveCmd)
 
-	// Here you will define your flags and configuration settings.
+	serveCmd.PersistentFlags().StringVarP(&address, "address", "a", ":8081", "Address to listen on")
+	serveCmd.PersistentFlags().BoolVarP(&logging, "logging", "l", false, "Enable logging")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// serveCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// serveCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
+	// Catch and add env vars to pflags
+	// Courtesy of https://github.com/coreos/pkg/blob/master/flagutil/env.go
+	serveCmd.PersistentFlags().VisitAll(func(f *pflag.Flag) {
+		key := strings.ToUpper(strings.Replace(f.Name, "-", "_", -1))
+		if val := os.Getenv(key); val != "" {
+			if err := serveCmd.PersistentFlags().Set(f.Name, val); err != nil {
+				log.Println("ERROR", err)
+			}
+		}
+	})
 }

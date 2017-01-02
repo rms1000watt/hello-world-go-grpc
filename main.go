@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/rms1000watt/hello-world-go-grpc/cmd"
+import "ox1.in/tools/cbd/cmd"
 
 func main() {
 	cmd.Execute()

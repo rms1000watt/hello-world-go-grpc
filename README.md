@@ -5,6 +5,7 @@
 - gRPC
 - GoVendor
 - Docker
+- Flag || Env configurated
 
 ## Installation
 
@@ -19,7 +20,6 @@ docker run rms1000watt/hello-world-go-grpc
 
 ## TODO
 
-- [] ENV-variable-based configuration
 - [] TLS
 - [] Client example
 - [] Tests
