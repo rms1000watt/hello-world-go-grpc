@@ -16,12 +16,13 @@ type Config struct {
 	Logging bool
 }
 
-type server struct {
-	config Config
+// Server is the server obj for hello world server
+type Server struct {
+	Config
 }
 
 // Hello is the RPC function to satisfy the gRPC service
-func (s *server) Hello(ctx context.Context, req *pb.HelloWorldRequest) (*pb.HelloWorldResponse, error) {
+func (s *Server) Hello(ctx context.Context, req *pb.HelloWorldRequest) (*pb.HelloWorldResponse, error) {
 	greetings := "Hello " + req.FirstName + " " + req.LastName
 
 	res := &pb.HelloWorldResponse{
@@ -32,8 +33,8 @@ func (s *server) Hello(ctx context.Context, req *pb.HelloWorldRequest) (*pb.Hell
 	return res, nil
 }
 
-func (s *server) log(req *pb.HelloWorldRequest, res *pb.HelloWorldResponse) {
-	if s.config.Logging {
+func (s *Server) log(req *pb.HelloWorldRequest, res *pb.HelloWorldResponse) {
+	if s.Config.Logging {
 		log.Println("REQUEST", req)
 		log.Println("RESPONSE", res)
 	}
@@ -43,17 +44,17 @@ func (s *server) log(req *pb.HelloWorldRequest, res *pb.HelloWorldResponse) {
 func Serve(config Config) {
 	lis, err := net.Listen("tcp", config.Address)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalln("Error listening", err)
 	}
 
 	grpcServer := grpc.NewServer()
-	s := &server{
-		config: config,
+	s := &Server{
+		Config: config,
 	}
 	pb.RegisterHelloWorldServer(grpcServer, s)
 
 	log.Println("Serving on", config.Address)
 	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatalln("Error serving", err)
 	}
 }
