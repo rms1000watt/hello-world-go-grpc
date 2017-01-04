@@ -4,9 +4,10 @@
 //go:generate echo "Running Tests"
 //go:generate go test
 //go:generate echo "Building Linux"
-//go:generate sh -c "GOOS=linux go build -o hello-world-go-grpc-linux"
+//go:generate sh -c "GOOS=linux go build -o ./bin/hello-world-go-grpc-linux"
 //go:generate echo "Dockerizing"
 //go:generate docker build -t docker.io/rms1000watt/hello-world-go-grpc:latest .
-//go:generate echo "(You can push image by running: `docker push docker.io/rms1000watt/hello-world-go-grpc:latest`)"
+//go:generate echo "(You can run image by executing: `docker run docker.io/rms1000watt/hello-world-go-grpc:latest`)"
+//go:generate echo "(You can push image by executing: `docker push docker.io/rms1000watt/hello-world-go-grpc:latest`)"
 
 package main

@@ -11,20 +11,30 @@ import (
 	"github.com/rms1000watt/hello-world-go-grpc/pb"
 	"github.com/rms1000watt/hello-world-go-grpc/src"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 var (
-	address = ":8081"
-	logging = false
+	address  = "127.0.0.1:8081"
+	logging  = false
+	certFile = ""
+	keyFile  = ""
 )
 
 func TestMain(m *testing.M) {
+	var err error
 	doneCh := make(chan bool)
 
 	// Define config
 	config := src.Config{
 		Address: address,
 		Logging: logging,
+	}
+
+	// Get certs
+	certFile, keyFile, err = src.GetCertKeyFiles()
+	if err != nil {
+		log.Fatalln("Error getting cert or key", err)
 	}
 
 	// Get listener
@@ -35,8 +45,15 @@ func TestMain(m *testing.M) {
 
 	// Start server in goroutine
 	go func(doneCh chan bool) {
+		// Setup TLS
+		transportCreds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
+		if err != nil {
+			log.Fatalln("Error reading in certs", err)
+		}
+		opts := []grpc.ServerOption{grpc.Creds(transportCreds)}
+
 		// Start server
-		grpcServer := grpc.NewServer()
+		grpcServer := grpc.NewServer(opts...)
 		s := &src.Server{
 			Config: config,
 		}
@@ -66,9 +83,14 @@ func TestMain(m *testing.M) {
 }
 
 func TestServer(t *testing.T) {
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
+	host := strings.Split(address, ":")[0]
+	transportCreds, err := credentials.NewClientTLSFromFile(certFile, host)
+	if err != nil {
+		t.Fatal("Failed getting cert", err)
+	}
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(transportCreds)}
 
+	// TODO: fix bad sever CA-signed-cert (because of self signed cert issue)
 	clientConn, err := grpc.Dial(address, opts...)
 	if err != nil {
 		t.Fatal("Failed connecting", err)
