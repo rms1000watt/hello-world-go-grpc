@@ -94,14 +94,14 @@ func GetCertKeyStrings() (string, string, error) {
 		for _, f := range files {
 			fullPath := filepath.Join(dir, f.Name())
 			switch f.Name() {
-			case "cert.pem":
+			case "cert.pem", "server.cer":
 				byteArr, err := ioutil.ReadFile(fullPath)
 				if err != nil {
 					return "", "", err
 				}
 				certStr = string(byteArr)
 				foundCert = true
-			case "key.pem":
+			case "key.pem", "server.key":
 				byteArr, err := ioutil.ReadFile(fullPath)
 				if err != nil {
 					return "", "", err
@@ -140,10 +140,10 @@ func GetCertKeyFiles() (string, string, error) {
 		for _, f := range files {
 			fullPath := filepath.Join(dir, f.Name())
 			switch f.Name() {
-			case "cert.pem":
+			case "cert.pem", "server.cer":
 				certFile = fullPath
 				foundCert = true
-			case "key.pem":
+			case "key.pem", "server.key":
 				keyFile = fullPath
 				foundKey = true
 			}

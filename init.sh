@@ -81,3 +81,15 @@ EOF
 # Create tests
 touch main_test.go
 # Edit main_test.go
+
+
+# Courtesy of https://github.com/deckarep/EasyCert
+# Generate CA key, cert & Server key, csr & Sign csr with CA creds
+mkdir cert
+cd cert
+openssl genrsa -out ca.key 2048
+openssl req -x509 -new -key ca.key -out ca.cer -days 90 -subj /CN="RMS1000WATT Certificate Authority"
+openssl genrsa -out server.key 2048
+openssl req -new -key server.key -out server.csr -subj /CN="127.0.0.1"
+openssl x509 -req -in server.csr -out server.cer -CAkey ca.key -CA ca.cer -days 90 -CAcreateserial -CAserial serial
+cd ..

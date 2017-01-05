@@ -17,10 +17,16 @@ View `init.sh`
 ## Usage
 
 ```
-# Gen self signed certs
+# Courtesy of https://github.com/deckarep/EasyCert
+# Generate CA key, cert & Server key, csr & Sign csr with CA creds
 mkdir cert
-curl https://golang.org/src/crypto/tls/generate_cert.go\?m\=text > cert/generate_cert.go
-cd cert && go run generate_cert.go --host 127.0.0.1 && cd ..
+cd cert
+openssl genrsa -out ca.key 2048
+openssl req -x509 -new -key ca.key -out ca.cer -days 90 -subj /CN="RMS1000WATT Certificate Authority"
+openssl genrsa -out server.key 2048
+openssl req -new -key server.key -out server.csr -subj /CN="127.0.0.1"
+openssl x509 -req -in server.csr -out server.cer -CAkey ca.key -CA ca.cer -days 90 -CAcreateserial -CAserial serial
+cd ..
 
 # Run Everything: protoc, go test, go build, docker build
 go generate
