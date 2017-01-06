@@ -49,10 +49,20 @@ EXPOSE 8081
 ENTRYPOINT ["/hello-world-go-grpc-linux", "serve"]
 EOF
 
-# Create a cert directory & get generate_cert & generate self signed certs
+# Courtesy of https://github.com/deckarep/EasyCert
+# Generate CA key, cert & Server key, csr & Sign csr with CA creds
+# TODO: touch generate-certs.sh
 mkdir cert
-curl https://golang.org/src/crypto/tls/generate_cert.go\?m\=text > cert/generate_cert.go
-cd cert && go run generate_cert.go --host 127.0.0.1 && cd ..
+cd cert
+openssl genrsa -out ca.key 2048
+openssl req -x509 -new -key ca.key -out ca.cer -days 90 -subj /CN="RMS1000WATT Certificate Authority"
+openssl genrsa -out server.key 2048
+openssl req -new -key server.key -out server.csr -subj /CN="localhost"
+# openssl req -new -key server.key -out server.csr -subj '/CN=localhost/subjectAltName=IP.1=127.0.0.1,IP.2=0.0.0.0'
+# openssl req -new -key server.key -out server.csr -subj '/CN=localhost/subjectAltName=IP.1=127.0.0.1,IP.2=0.0.0.0' -reqexts SAN 
+# openssl req -new -key server.key -out server.csr -subj "/CN=localhost" -reqexts SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=IP:127.0.0.1,IP:0.0.0.0")) 
+openssl x509 -req -in server.csr -out server.cer -CAkey ca.key -CA ca.cer -days 90 -CAcreateserial -CAserial serial
+cd ..
 
 
 # Create a doc.go file with go:generate 
@@ -60,6 +70,8 @@ cat <<EOF > doc.go
 //go:generate echo "(You can pass in ENV variables to this command `KEY1=value1 KEY2=value2 go generate`)"
 //go:generate echo "Generating Protobuf"
 //go:generate protoc --go_out=plugins=grpc:. pb/helloWorld.proto
+//go:generate echo "Generating Certs"
+//go:generate echo "TODO: bash generate-certs.sh"
 //go:generate echo "Running Tests"
 //go:generate go test
 //go:generate echo "Building Linux"
@@ -82,14 +94,3 @@ EOF
 touch main_test.go
 # Edit main_test.go
 
-
-# Courtesy of https://github.com/deckarep/EasyCert
-# Generate CA key, cert & Server key, csr & Sign csr with CA creds
-mkdir cert
-cd cert
-openssl genrsa -out ca.key 2048
-openssl req -x509 -new -key ca.key -out ca.cer -days 90 -subj /CN="RMS1000WATT Certificate Authority"
-openssl genrsa -out server.key 2048
-openssl req -new -key server.key -out server.csr -subj /CN="127.0.0.1"
-openssl x509 -req -in server.csr -out server.cer -CAkey ca.key -CA ca.cer -days 90 -CAcreateserial -CAserial serial
-cd ..

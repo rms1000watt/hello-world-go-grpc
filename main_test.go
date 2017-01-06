@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"log"
-	"net"
+	"os"
 	"testing"
 
 	"strings"
@@ -15,76 +15,28 @@ import (
 )
 
 var (
-	address  = "127.0.0.1:8081"
-	logging  = false
-	certFile = ""
-	keyFile  = ""
+	address = "localhost:8081"
+	logging = false
 )
 
 func TestMain(m *testing.M) {
-	var err error
-	doneCh := make(chan bool)
-
-	// Define config
 	config := src.Config{
 		Address: address,
 		Logging: logging,
 	}
-
-	// Get certs
-	certFile, keyFile, err = src.GetCertKeyFiles()
-	if err != nil {
-		log.Fatalln("Error getting cert or key", err)
-	}
-
-	// Get listener
-	lis, err := net.Listen("tcp", config.Address)
-	if err != nil {
-		log.Fatalln("Error listening", err)
-	}
-
-	// Start server in goroutine
-	go func(doneCh chan bool) {
-		// Setup TLS
-		transportCreds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
-		if err != nil {
-			log.Fatalln("Error reading in certs", err)
-		}
-		opts := []grpc.ServerOption{grpc.Creds(transportCreds)}
-
-		// Start server
-		grpcServer := grpc.NewServer(opts...)
-		s := &src.Server{
-			Config: config,
-		}
-		pb.RegisterHelloWorldServer(grpcServer, s)
-
-		// Ignore error since it WILL error because lis.Close() called below
-		grpcServer.Serve(lis)
-
-		// For proper cleanup
-		doneCh <- true
-	}(doneCh)
-
-	// Give the server some time to start up..
-	// time.Sleep(3 * time.Second)
-
-	// Run Test
-	m.Run()
-
-	// Close listener
-	err = lis.Close()
-	if err != nil {
-		log.Println("Error closing listener", err)
-	}
-
-	// For proper cleanup
-	<-doneCh
+	go src.Serve(config)
+	os.Exit(m.Run())
 }
 
 func TestServer(t *testing.T) {
 	host := strings.Split(address, ":")[0]
-	transportCreds, err := credentials.NewClientTLSFromFile(certFile, host)
+
+	caCertFile, err := src.GetCACertFile()
+	if err != nil {
+		log.Fatalln("Error getting CA Cert")
+	}
+
+	transportCreds, err := credentials.NewClientTLSFromFile(caCertFile, host)
 	if err != nil {
 		t.Fatal("Failed getting cert", err)
 	}

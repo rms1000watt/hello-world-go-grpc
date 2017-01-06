@@ -9,6 +9,7 @@
 - Tests (main_test.go)
 - Client Example (main_test.go)
 - Go Generate (doc.go)
+- TLS (self generateed CA & Server key,csr,cert)
 
 ## Installation
 
@@ -47,5 +48,5 @@ protoc --go_out=plugins=grpc:. pb/helloWorld.proto
 
 ## TODO
 
-- [] TLS self-signed
+- [] Serving in container
 - [] TLS letsencrypt (autocert)

@@ -48,7 +48,7 @@ func (s *Server) log(req *pb.HelloWorldRequest, res *pb.HelloWorldResponse) {
 
 // Serve is the main logic for the "serve" command
 func Serve(config Config) {
-	certFile, keyFile, err := GetCertKeyFiles()
+	certFile, keyFile, err := GetServerCertKeyFiles()
 	if err != nil {
 		log.Fatalln("Error getting cert or key", err)
 	}
@@ -76,54 +76,8 @@ func Serve(config Config) {
 	}
 }
 
-// GetCertKeyStrings returns the cert and key strings
-func GetCertKeyStrings() (string, string, error) {
-	var err error
-	keyStr := ""
-	certStr := ""
-	foundKey := false
-	foundCert := false
-	dirs := []string{"./", "./cert"}
-
-	for _, dir := range dirs {
-		files, err := ioutil.ReadDir(dir)
-		if err != nil {
-			return "", "", err
-		}
-
-		for _, f := range files {
-			fullPath := filepath.Join(dir, f.Name())
-			switch f.Name() {
-			case "cert.pem", "server.cer":
-				byteArr, err := ioutil.ReadFile(fullPath)
-				if err != nil {
-					return "", "", err
-				}
-				certStr = string(byteArr)
-				foundCert = true
-			case "key.pem", "server.key":
-				byteArr, err := ioutil.ReadFile(fullPath)
-				if err != nil {
-					return "", "", err
-				}
-				keyStr = string(byteArr)
-				foundKey = true
-			}
-		}
-
-		if foundCert && foundKey {
-			return certStr, keyStr, nil
-		}
-	}
-
-	if !(foundCert && foundKey) {
-		err = errors.New("Could not find key and cert")
-	}
-	return certStr, keyStr, err
-}
-
-// GetCertKeyFiles returns the cert and key files
-func GetCertKeyFiles() (string, string, error) {
+// GetServerCertKeyFiles returns the cert and key file paths
+func GetServerCertKeyFiles() (string, string, error) {
 	var err error
 	keyFile := ""
 	certFile := ""
@@ -158,4 +112,25 @@ func GetCertKeyFiles() (string, string, error) {
 		err = errors.New("Could not find key and cert")
 	}
 	return certFile, keyFile, err
+}
+
+// GetCACertFile returns the CA cert file path
+func GetCACertFile() (string, error) {
+	caCertFileName := "ca.cer"
+	dirs := []string{"./", "./cert"}
+
+	for _, dir := range dirs {
+		files, err := ioutil.ReadDir(dir)
+		if err != nil {
+			return "", err
+		}
+
+		for _, f := range files {
+			if f.Name() == caCertFileName {
+				return filepath.Join(dir, caCertFileName), nil
+			}
+		}
+	}
+
+	return "", errors.New("Could not find " + caCertFileName)
 }

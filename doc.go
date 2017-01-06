@@ -1,6 +1,8 @@
 //go:generate echo "(You can pass in ENV variables to this command `KEY1=value1 KEY2=value2 go generate`)"
 //go:generate echo "Generating Protobuf"
 //go:generate protoc --go_out=plugins=grpc:. pb/helloWorld.proto
+//go:generate echo "Generating Certs"
+//go:generate echo "TODO: bash generate-certs.sh"
 //go:generate echo "Running Tests"
 //go:generate go test
 //go:generate echo "Building Linux"
