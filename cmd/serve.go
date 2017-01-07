@@ -38,7 +38,7 @@ the RPC contract.
 func init() {
 	RootCmd.AddCommand(serveCmd)
 
-	serveCmd.PersistentFlags().StringVarP(&address, "address", "a", "localhost:8081", "Address to listen on")
+	serveCmd.PersistentFlags().StringVarP(&address, "address", "a", ":8081", "Address to listen on")
 	serveCmd.PersistentFlags().BoolVarP(&logging, "logging", "l", false, "Enable logging")
 
 	// Catch and add env vars to pflags
