@@ -42,7 +42,6 @@ func TestServer(t *testing.T) {
 	}
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(transportCreds)}
 
-	// TODO: fix bad sever CA-signed-cert (because of self signed cert issue)
 	clientConn, err := grpc.Dial(address, opts...)
 	if err != nil {
 		t.Fatal("Failed connecting", err)
